@@ -1,0 +1,25 @@
+{
+  "name": "api-rate-limiter-throttler",
+  "version": "1.0.0",
+  "description": "Every single production API on earth needs a rate limiter. In this repo i will build this from scratch.",
+  "main": "main.js",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theniteshdev/API-rate-limiter-throttler.git"
+  },
+  "keywords": [
+    "api-rate-limiter",
+    "throttler",
+    "api-security"
+  ],
+  "author": "theniteshdev",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/theniteshdev/API-rate-limiter-throttler/issues"
+  },
+  "homepage": "https://github.com/theniteshdev/API-rate-limiter-throttler#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
