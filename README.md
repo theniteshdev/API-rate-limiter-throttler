@@ -38,13 +38,13 @@ While building this project I have used the _Sliding Window_ algorithm.
   Example Object where User IP saves-
 
 ```javascript
-[
+{
 '192.168.1.2': {
     timeStamps: [1777234234, 1771231231, 1772323555,...],
     // no of request == length of the timestamp, So using the length we can find the request count by user.
 },
 ...
-]
+}
 ```
 
 - filter the if the timestamps older than 1000ms
