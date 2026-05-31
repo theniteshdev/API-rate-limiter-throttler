@@ -1,28 +1,49 @@
 // main api rate limiter middleware
 const ipMapping = {};
 
+const WINDOW_MS = 5000;
+const MAX_REQS = 5;
+
 // this is custom API rate limitter using Slide Window Algorithm
 export const RateLimitHandler = (req, res, next) => {
-    const date = new Date;
-    if (ipMapping[req?.ip]) {
-        ipMapping[req?.ip] = [...ipMapping[req?.ip], date.getTime()]
-    } else {
-        ipMapping[req?.ip] = [date.getTime()]
+    const clientIp = req.ip || req.headers['x-forwarded-for'];
+    const now = Date.now();
+
+    //Logical Nullish Operator instead of if statement
+    ipMapping[clientIp] ??= [];
+
+    //Filtering out the timestamps older WINDOW_MS 
+    ipMapping[clientIp] = ipMapping[clientIp].filter(
+        (timestamp) => (now - timestamp) < WINDOW_MS //5000
+    )
+    
+    //Logging the timestamp
+    ipMapping[clientIp].push(now);
+    
+    //Checking limit boundaries
+    if (ipMapping[clientIp].length > MAX_REQS) {
+        // Set proper HTTP status header
+        res.status(429).json({
+            status: 429,
+            error: "Too Many Requests",
+            message: "Too many requests from your IP. Please try again later."
+        });
+        return; // Stop execution here
     }
 
-    ipMapping[req?.ip] = ipMapping[req?.ip].filter(timestamp =>
-        (date.getTime() - timestamp) < 1000);
-    // here its handle 5reqs/1000ms
-
-    if (ipMapping[req?.ip]?.length <= 5) {
-        next();
-    } else if (ipMapping[req?.ip].length > 5) {
-        res.end("429 | To Many Request from you IP.");
-    };
-
-    if (ipMapping[req?.ip].length === 0) {
-        delete ipMapping[req?.ip];
-    }; // delete the old ips who don't send request for long time
-    console.log(ipMapping);
-    res.end();
+    next();
 };
+
+setInterval(() => {
+    const current = Date.now();
+    for(let ip in ipMapping){
+        //Filtering out the timestamps older WINDOW_MS 
+        ipMapping[ip] = ipMapping[ip].filter(
+            (timestamp) => (current - timestamp) < WINDOW_MS //5000
+        )
+        //Deleting if it's old
+        if(ipMapping[ip].length === 0){
+            delete ipMapping[ip];
+        }
+    }
+}, 5000)
